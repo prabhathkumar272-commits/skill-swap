@@ -1,18 +1,18 @@
-<div align="center">
-
 # SkillSwap Campus
 
-### Learn together. Teach what you know.
+<div align="center">
 
-A campus peer-learning prototype that helps students find skill exchange partners, send swap requests, and arrange learning sessions.
+**Learn together. Teach what you know.**
 
-<p>
-  <img src="https://img.shields.io/badge/Angular-21-DD0031?logo=angular&logoColor=white" alt="Angular 21" />
-  <img src="https://img.shields.io/badge/Node.js-API-339933?logo=nodedotjs&logoColor=white" alt="Node.js API" />
-  <img src="https://img.shields.io/badge/Express-4-111111?logo=express&logoColor=white" alt="Express 4" />
-  <img src="https://img.shields.io/badge/MongoDB-Mongoose-47A248?logo=mongodb&logoColor=white" alt="MongoDB with Mongoose" />
-  <img src="https://img.shields.io/badge/Auth-JWT%20%2B%20bcrypt-6B46C1" alt="JWT authentication with bcrypt" />
-</p>
+A campus skill exchange for students to discover complementary skills, connect with peers, and schedule learning sessions.
+
+<br />
+
+![Angular 21](https://img.shields.io/badge/Angular-21-DD0031?logo=angular&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-API-339933?logo=nodedotjs&logoColor=white)
+![Express 4](https://img.shields.io/badge/Express-4-111111?logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?logo=mongodb&logoColor=white)
+![Auth](https://img.shields.io/badge/Auth-JWT%20%2B%20bcrypt-6B46C1)
 
 </div>
 
@@ -20,53 +20,52 @@ A campus peer-learning prototype that helps students find skill exchange partner
 
 ## Overview
 
-SkillSwap Campus connects students who want to learn with peers who can teach. Members create profiles with skills they offer and want to learn, explore suggested matches, exchange requests, and schedule sessions.
+SkillSwap Campus helps students trade knowledge without payment. Create a profile with skills you can teach and want to learn, find peers with complementary interests, send swap requests, and coordinate sessions.
 
-The project has an Angular single-page frontend and a separate Express API backed by MongoDB. It is a portfolio prototype for peer-to-peer learning workflows.
+The application is split into an Angular single-page frontend and a Node.js/Express REST API backed by MongoDB.
 
-## Features
+## What you can do
 
-- **Skill profiles** — manage a bio, skills offered, skills wanted, and availability.
-- **Complementary matches** — compare offered and wanted skills, then rank people by the number of overlapping exchange opportunities.
-- **Swap requests** — send a request with the skills being offered and requested, then accept or reject incoming requests.
-- **Session scheduling** — create sessions with a topic, date, time slot, meeting link, and notes; update their status as scheduled, completed, or cancelled.
-- **Protected pages** — dashboard, profile, matches, requests, and sessions are guarded by frontend authentication.
-- **API authentication** — issue JWTs at registration and login, with passwords hashed using bcryptjs.
+- **Build a skill profile** with a bio, skills offered, skills wanted, and availability.
+- **Find complementary matches** based on overlapping teach-and-learn interests.
+- **Manage swap requests** by sending, accepting, or rejecting exchanges.
+- **Schedule learning sessions** with a topic, date, time, meeting link, and notes.
+- **Use protected pages and API routes** with JWT-based authentication.
 
-## Screenshots
+## Stack
 
-No application screenshots are currently included in the repository. Add screenshots here when current captures are available.
-
-## Technology stack
-
-| Area | Technologies |
+| Layer | Technologies |
 | --- | --- |
 | Frontend | Angular 21, TypeScript, RxJS, Angular Router |
-| Backend | Node.js, Express 4 |
-| Database | MongoDB, Mongoose 8 |
-| Authentication | JSON Web Tokens, bcryptjs |
-| Development | Angular CLI, Nodemon |
+| API | Node.js, Express 4 |
+| Data | MongoDB, Mongoose 8 |
+| Authentication | JWT, bcryptjs |
+| Tooling | Angular CLI, npm, Nodemon |
 
-## Getting started
+## Get started
 
-### Prerequisites
+### Requirements
 
-- Node.js 20.19+, 22.12+, or 24+
+- Node.js **20.19+**, **22.12+**, or **24+**
 - npm
 - MongoDB running locally or a MongoDB connection string
 
 ### 1. Configure and start the API
 
+In a terminal:
+
 ```bash
 cd skillswap-backend
-npm install
+npm ci
 ```
 
-Copy `.env.example` to `.env`, then set a private `JWT_SECRET` and the desired `MONGO_URI`. For PowerShell, use:
+Create `skillswap-backend/.env` from the example. In PowerShell:
 
 ```powershell
 Copy-Item .env.example .env
 ```
+
+Set a private `JWT_SECRET` in `.env`. The example uses a local MongoDB database at `mongodb://127.0.0.1:27017/skillswap`.
 
 Start the API in development mode:
 
@@ -74,19 +73,19 @@ Start the API in development mode:
 npm run dev
 ```
 
-The API connects to MongoDB before listening. It uses port `5000` by default.
+The API waits for MongoDB before listening at `http://localhost:5000`.
 
 ### 2. Start the frontend
 
-In a second terminal, from the repository root:
+Open a second terminal:
 
 ```bash
 cd skillswap-frontend
-npm install
+npm ci
 npm start
 ```
 
-Open [http://localhost:4200](http://localhost:4200). The frontend calls the API at `http://localhost:5000/api` by default.
+Open [http://localhost:4200](http://localhost:4200). The frontend sends API requests to `http://localhost:5000/api`.
 
 ### 3. Build the frontend
 
@@ -96,66 +95,68 @@ From `skillswap-frontend`:
 npm run build
 ```
 
-## Environment variables
+The production bundle is written to `skillswap-frontend/dist/`.
 
-Configure these in `skillswap-backend/.env`:
+## Configuration
 
-| Variable | Default | Purpose |
+Set these variables in `skillswap-backend/.env`:
+
+| Variable | Example | Purpose |
 | --- | --- | --- |
 | `PORT` | `5000` | API port |
 | `MONGO_URI` | `mongodb://127.0.0.1:27017/skillswap` | MongoDB connection string |
-| `JWT_SECRET` | No production default | Secret used to sign authentication tokens; set a long, random value |
-| `CLIENT_ORIGIN` | `http://localhost:4200,http://127.0.0.1:4200` | Comma-separated frontend origins allowed by CORS |
+| `JWT_SECRET` | Generate a long random value | Signs authentication tokens |
+| `CLIENT_ORIGIN` | `http://localhost:4200,http://127.0.0.1:4200` | Comma-separated origins permitted by CORS |
 
-Never commit `.env` files or real credentials. The repository includes `.env.example` with local-development defaults.
+Keep real credentials in `.env`; do not commit them. The repository ignores local environment files and includes `.env.example` as a template.
 
-## API overview
+## API reference
 
 Base URL: `http://localhost:5000`
 
-| Method | Route | Description |
-| --- | --- | --- |
-| `GET` | `/` | API status message |
-| `POST` | `/api/register` | Create an account and return a token |
-| `POST` | `/api/login` | Authenticate and return a token |
-| `GET` | `/api/users` | List users (authentication required) |
-| `GET` | `/api/users/:id` | Retrieve a user profile |
-| `PUT` | `/api/users/:id` | Update the signed-in user's profile |
-| `POST` | `/api/match` | Find users with overlapping offer/wanted skills |
-| `GET` | `/api/requests` | List requests involving the signed-in user |
-| `POST` | `/api/requests` | Send a skill swap request |
-| `PUT` | `/api/requests/:id` | Accept or reject a request |
-| `GET` | `/api/sessions` | List sessions for the signed-in user |
-| `POST` | `/api/sessions` | Schedule a session |
-| `PUT` | `/api/sessions/:id` | Update a session status |
+| Method | Endpoint | Description | Auth |
+| --- | --- | --- | --- |
+| `GET` | `/` | API health message | No |
+| `POST` | `/api/register` | Create an account | No |
+| `POST` | `/api/login` | Sign in | No |
+| `GET` | `/api/users` | List users | Yes |
+| `GET` | `/api/users/:id` | Get a user profile | Yes |
+| `PUT` | `/api/users/:id` | Update your profile | Yes |
+| `POST` | `/api/match` | Find complementary matches | Yes |
+| `GET` | `/api/requests` | List your swap requests | Yes |
+| `POST` | `/api/requests` | Send a swap request | Yes |
+| `PUT` | `/api/requests/:id` | Accept or reject a request | Yes |
+| `GET` | `/api/sessions` | List your sessions | Yes |
+| `POST` | `/api/sessions` | Schedule a session | Yes |
+| `PUT` | `/api/sessions/:id` | Update a session status | Yes |
 
-Protected API routes expect a bearer token in the `Authorization` header:
+Protected endpoints require a bearer token:
 
 ```http
 Authorization: Bearer <token>
 ```
 
-## Repository structure
+## Project layout
 
 ```text
 .
 ├── skillswap-backend/
-│   ├── config/       # MongoDB connection
+│   ├── config/       # Database connection
 │   ├── middleware/   # JWT authentication
 │   ├── models/       # User, request, and session schemas
-│   ├── routes/       # Auth, users, matches, requests, and sessions
+│   ├── routes/       # Authentication and application endpoints
 │   └── server.js
 └── skillswap-frontend/
     └── src/app/
-        ├── guards/   # Route authentication guard
+        ├── guards/   # Protected-route guard
         ├── pages/    # Home, auth, dashboard, profile, matches, requests, sessions
-        └── services/ # API and authentication services
+        └── services/ # API and authentication clients
 ```
 
-## Project scope
+## Scope and security
 
-SkillSwap Campus demonstrates peer skill discovery and session coordination. It does not implement payments, paid tutor search, or a production deployment workflow. Review the seeded demo accounts in `skillswap-backend/seeder.js` before sharing a running instance, and never reuse demo credentials in a real environment.
+This repository is a portfolio prototype for peer learning and session coordination. It does not provide payments, paid tutor search, or a production deployment workflow. Review `skillswap-backend/seeder.js` before running seed data, and do not reuse demo credentials in real environments.
 
 ## License
 
-No license file is currently included. Contact the project maintainers before reusing or redistributing this work.
+No license file is included. Contact the project maintainers before reusing or redistributing this project.
