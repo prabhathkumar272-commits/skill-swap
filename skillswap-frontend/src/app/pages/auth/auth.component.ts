@@ -1,14 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-auth',
-  standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
-  template: `
+    selector: 'app-auth',
+    imports: [FormsModule, RouterLink],
+    template: `
     <div class="auth-page">
       <div class="auth-left">
         <a routerLink="/" class="back-home">← Home</a>
@@ -21,13 +20,15 @@ import { AuthService } from '../../services/auth.service';
           <p>Exchange skills with students around you — no money, just knowledge.</p>
         </div>
         <div class="auth-features">
-          <div class="feature-item" *ngFor="let f of features">
-            <span class="fi">{{ f.icon }}</span>
-            <span>{{ f.text }}</span>
-          </div>
+          @for (f of features; track f) {
+            <div class="feature-item">
+              <span class="fi">{{ f.icon }}</span>
+              <span>{{ f.text }}</span>
+            </div>
+          }
         </div>
       </div>
-
+    
       <div class="auth-right">
         <div class="auth-card">
           <!-- Tabs -->
@@ -35,57 +36,65 @@ import { AuthService } from '../../services/auth.service';
             <button [class.active]="tab() === 'login'" (click)="tab.set('login')">Sign In</button>
             <button [class.active]="tab() === 'register'" (click)="tab.set('register')">Sign Up</button>
           </div>
-
+    
           <!-- Login Form -->
-          <form *ngIf="tab() === 'login'" (ngSubmit)="login()" class="auth-form fade-in">
-            <div class="form-group">
-              <label>Email Address</label>
-              <input class="form-control" type="email" [(ngModel)]="loginData.email" name="email" placeholder="you@college.edu" required />
-            </div>
-            <div class="form-group">
-              <label>Password</label>
-              <input class="form-control" type="password" [(ngModel)]="loginData.password" name="password" placeholder="••••••••" required />
-            </div>
-            <div class="error-msg" *ngIf="error()">{{ error() }}</div>
-            <button class="btn btn-primary btn-block" type="submit" [disabled]="loading()">
-              {{ loading() ? 'Signing In...' : 'Sign In →' }}
-            </button>
-            <p class="switch-link">Don't have an account? <a (click)="tab.set('register')" class="link">Sign Up</a></p>
-          </form>
-
+          @if (tab() === 'login') {
+            <form (ngSubmit)="login()" class="auth-form fade-in">
+              <div class="form-group">
+                <label>Email Address</label>
+                <input class="form-control" type="email" [(ngModel)]="loginData.email" name="email" placeholder="you@college.edu" required />
+              </div>
+              <div class="form-group">
+                <label>Password</label>
+                <input class="form-control" type="password" [(ngModel)]="loginData.password" name="password" placeholder="••••••••" required />
+              </div>
+              @if (error()) {
+                <div class="error-msg">{{ error() }}</div>
+              }
+              <button class="btn btn-primary btn-block" type="submit" [disabled]="loading()">
+                {{ loading() ? 'Signing In...' : 'Sign In →' }}
+              </button>
+              <p class="switch-link">Don't have an account? <a (click)="tab.set('register')" class="link">Sign Up</a></p>
+            </form>
+          }
+    
           <!-- Register Form -->
-          <form *ngIf="tab() === 'register'" (ngSubmit)="register()" class="auth-form fade-in">
-            <div class="form-group">
-              <label>Full Name</label>
-              <input class="form-control" type="text" [(ngModel)]="regData.name" name="name" placeholder="Your Name" required />
-            </div>
-            <div class="form-group">
-              <label>Email Address</label>
-              <input class="form-control" type="email" [(ngModel)]="regData.email" name="email" placeholder="you@college.edu" required />
-            </div>
-            <div class="form-group">
-              <label>Password</label>
-              <input class="form-control" type="password" [(ngModel)]="regData.password" name="password" placeholder="Min. 6 characters" required />
-            </div>
-            <div class="form-group">
-              <label>Skills You Can Teach <span class="hint">(comma-separated)</span></label>
-              <input class="form-control" type="text" [(ngModel)]="skillsOfferedInput" name="skillsOffered" placeholder="e.g. Python, Guitar, Photoshop" />
-            </div>
-            <div class="form-group">
-              <label>Skills You Want to Learn <span class="hint">(comma-separated)</span></label>
-              <input class="form-control" type="text" [(ngModel)]="skillsWantedInput" name="skillsWanted" placeholder="e.g. React, English, Video Editing" />
-            </div>
-            <div class="error-msg" *ngIf="error()">{{ error() }}</div>
-            <button class="btn btn-primary btn-block" type="submit" [disabled]="loading()">
-              {{ loading() ? 'Creating Account...' : 'Create Account →' }}
-            </button>
-            <p class="switch-link">Already have an account? <a (click)="tab.set('login')" class="link">Sign In</a></p>
-          </form>
+          @if (tab() === 'register') {
+            <form (ngSubmit)="register()" class="auth-form fade-in">
+              <div class="form-group">
+                <label>Full Name</label>
+                <input class="form-control" type="text" [(ngModel)]="regData.name" name="name" placeholder="Your Name" required />
+              </div>
+              <div class="form-group">
+                <label>Email Address</label>
+                <input class="form-control" type="email" [(ngModel)]="regData.email" name="email" placeholder="you@college.edu" required />
+              </div>
+              <div class="form-group">
+                <label>Password</label>
+                <input class="form-control" type="password" [(ngModel)]="regData.password" name="password" placeholder="Min. 6 characters" required />
+              </div>
+              <div class="form-group">
+                <label>Skills You Can Teach <span class="hint">(comma-separated)</span></label>
+                <input class="form-control" type="text" [(ngModel)]="skillsOfferedInput" name="skillsOffered" placeholder="e.g. Python, Guitar, Photoshop" />
+              </div>
+              <div class="form-group">
+                <label>Skills You Want to Learn <span class="hint">(comma-separated)</span></label>
+                <input class="form-control" type="text" [(ngModel)]="skillsWantedInput" name="skillsWanted" placeholder="e.g. React, English, Video Editing" />
+              </div>
+              @if (error()) {
+                <div class="error-msg">{{ error() }}</div>
+              }
+              <button class="btn btn-primary btn-block" type="submit" [disabled]="loading()">
+                {{ loading() ? 'Creating Account...' : 'Create Account →' }}
+              </button>
+              <p class="switch-link">Already have an account? <a (click)="tab.set('login')" class="link">Sign In</a></p>
+            </form>
+          }
         </div>
       </div>
     </div>
-  `,
-  styles: [`
+    `,
+    styles: [`
     .auth-page {
       min-height: 100vh;
       display: flex;
@@ -180,18 +189,31 @@ export class AuthComponent {
   }
 
   login() {
+    const email = this.loginData.email.trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !this.loginData.password) {
+      this.error.set('Enter a valid email address and password.');
+      return;
+    }
+
     this.loading.set(true); this.error.set('');
-    this.auth.login(this.loginData).subscribe({
+    this.auth.login({ ...this.loginData, email }).subscribe({
       next: () => this.router.navigate(['/dashboard']),
       error: (e) => { this.error.set(e.error?.message || 'Login failed'); this.loading.set(false); }
     });
   }
 
   register() {
+    const name = this.regData.name.trim();
+    const email = this.regData.email.trim();
+    if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || this.regData.password.length < 8) {
+      this.error.set('Enter your name, a valid email address, and a password of at least 8 characters.');
+      return;
+    }
+
     this.loading.set(true); this.error.set('');
     const skillsOffered = this.skillsOfferedInput.split(',').map(s => s.trim()).filter(Boolean);
     const skillsWanted = this.skillsWantedInput.split(',').map(s => s.trim()).filter(Boolean);
-    this.auth.register({ ...this.regData, skillsOffered, skillsWanted }).subscribe({
+    this.auth.register({ ...this.regData, name, email, skillsOffered, skillsWanted }).subscribe({
       next: () => this.router.navigate(['/dashboard']),
       error: (e) => { this.error.set(e.error?.message || 'Registration failed'); this.loading.set(false); }
     });

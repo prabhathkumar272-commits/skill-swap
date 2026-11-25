@@ -6,7 +6,11 @@ const connectDB = require('./config/db');
 dotenv.config();
 
 const app = express();
-app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:4200' }));
+const clientOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:4200')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+app.use(cors({ origin: clientOrigins }));
 app.use(express.json());
 
 // Routes

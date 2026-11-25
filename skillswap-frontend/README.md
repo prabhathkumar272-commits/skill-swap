@@ -1,6 +1,6 @@
 # SkillswapFrontend
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.17.
+This project uses Angular 21 and was updated with the Angular CLI migration schematics.
 
 ## Development server
 

@@ -4,119 +4,141 @@ import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-requests',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
+    selector: 'app-requests',
+    imports: [CommonModule],
+    template: `
     <div class="page fade-in">
       <div class="page-header">
         <h1>🤝 Swap Requests</h1>
         <p>Manage your incoming and outgoing skill exchange requests</p>
       </div>
-
+    
       <!-- Tabs -->
       <div class="req-tabs">
         <button [class.active]="activeTab() === 'received'" (click)="activeTab.set('received')">
-          Received <span class="count-badge" *ngIf="received().length">{{ received().length }}</span>
-        </button>
-        <button [class.active]="activeTab() === 'sent'" (click)="activeTab.set('sent')">
-          Sent <span class="count-badge" *ngIf="sent().length">{{ sent().length }}</span>
-        </button>
-      </div>
-
-      <!-- Loading -->
-      <div class="loading-state" *ngIf="loading()">
+          Received @if (received().length) {
+          <span class="count-badge">{{ received().length }}</span>
+        }
+      </button>
+      <button [class.active]="activeTab() === 'sent'" (click)="activeTab.set('sent')">
+        Sent @if (sent().length) {
+        <span class="count-badge">{{ sent().length }}</span>
+      }
+    </button>
+    </div>
+    
+    <!-- Loading -->
+    @if (loading()) {
+      <div class="loading-state">
         <div class="spinner"></div>
         <p>Loading requests...</p>
       </div>
-
-      <!-- Received -->
-      <div *ngIf="!loading() && activeTab() === 'received'">
-        <div class="empty-state" *ngIf="received().length === 0">
-          <div class="empty-icon">📭</div>
-          <h3>No incoming requests</h3>
-          <p>When students send you swap requests, they'll appear here.</p>
-        </div>
-        <div class="requests-list" *ngIf="received().length > 0">
-          <div class="request-card card" *ngFor="let r of received()">
-            <div class="req-header">
-              <div class="req-avatar">{{ getInitials(r.senderId?.name) }}</div>
-              <div class="req-meta">
-                <h4>{{ r.senderId?.name }}</h4>
-                <p>{{ r.senderId?.email }}</p>
-                <div class="req-time">{{ r.createdAt | date:'mediumDate' }}</div>
-              </div>
-              <span class="badge" [class]="'badge-' + r.status">{{ r.status }}</span>
-            </div>
-
-            <div class="req-exchange">
-              <div class="req-skill-row">
-                <span class="req-arrow">🎁</span>
-                <span class="req-label">They offer:</span>
-                <span class="skill-tag skill-offered">{{ r.skillOffered }}</span>
-              </div>
-              <div class="req-skill-row">
-                <span class="req-arrow">🎯</span>
-                <span class="req-label">They want:</span>
-                <span class="skill-tag skill-wanted">{{ r.skillRequested }}</span>
-              </div>
-            </div>
-
-            <div class="req-message" *ngIf="r.message">
-              <span class="msg-icon">💬</span>
-              <span>{{ r.message }}</span>
-            </div>
-
-            <div class="req-actions" *ngIf="r.status === 'pending'">
-              <button class="btn btn-success" (click)="respond(r._id, 'accepted')">✅ Accept</button>
-              <button class="btn btn-danger" (click)="respond(r._id, 'rejected')">❌ Decline</button>
-            </div>
+    }
+    
+    <!-- Received -->
+    @if (!loading() && activeTab() === 'received') {
+      <div>
+        @if (received().length === 0) {
+          <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <h3>No incoming requests</h3>
+            <p>When students send you swap requests, they'll appear here.</p>
           </div>
-        </div>
-      </div>
-
-      <!-- Sent -->
-      <div *ngIf="!loading() && activeTab() === 'sent'">
-        <div class="empty-state" *ngIf="sent().length === 0">
-          <div class="empty-icon">📤</div>
-          <h3>No sent requests yet</h3>
-          <p>Go to Matches to send a swap request to a compatible student.</p>
-        </div>
-        <div class="requests-list" *ngIf="sent().length > 0">
-          <div class="request-card card" *ngFor="let r of sent()">
-            <div class="req-header">
-              <div class="req-avatar warm">{{ getInitials(r.receiverId?.name) }}</div>
-              <div class="req-meta">
-                <h4>{{ r.receiverId?.name }}</h4>
-                <p>{{ r.receiverId?.email }}</p>
-                <div class="req-time">{{ r.createdAt | date:'mediumDate' }}</div>
+        }
+        @if (received().length > 0) {
+          <div class="requests-list">
+            @for (r of received(); track r) {
+              <div class="request-card card">
+                <div class="req-header">
+                  <div class="req-avatar">{{ getInitials(r.senderId?.name) }}</div>
+                  <div class="req-meta">
+                    <h4>{{ r.senderId?.name }}</h4>
+                    <p>{{ r.senderId?.email }}</p>
+                    <div class="req-time">{{ r.createdAt | date:'mediumDate' }}</div>
+                  </div>
+                  <span class="badge" [class]="'badge-' + r.status">{{ r.status }}</span>
+                </div>
+                <div class="req-exchange">
+                  <div class="req-skill-row">
+                    <span class="req-arrow">🎁</span>
+                    <span class="req-label">They offer:</span>
+                    <span class="skill-tag skill-offered">{{ r.skillOffered }}</span>
+                  </div>
+                  <div class="req-skill-row">
+                    <span class="req-arrow">🎯</span>
+                    <span class="req-label">They want:</span>
+                    <span class="skill-tag skill-wanted">{{ r.skillRequested }}</span>
+                  </div>
+                </div>
+                @if (r.message) {
+                  <div class="req-message">
+                    <span class="msg-icon">💬</span>
+                    <span>{{ r.message }}</span>
+                  </div>
+                }
+                @if (r.status === 'pending') {
+                  <div class="req-actions">
+                    <button class="btn btn-success" (click)="respond(r._id, 'accepted')">✅ Accept</button>
+                    <button class="btn btn-danger" (click)="respond(r._id, 'rejected')">❌ Decline</button>
+                  </div>
+                }
               </div>
-              <span class="badge" [class]="'badge-' + r.status">{{ r.status }}</span>
-            </div>
-
-            <div class="req-exchange">
-              <div class="req-skill-row">
-                <span class="req-arrow">🎁</span>
-                <span class="req-label">You offer:</span>
-                <span class="skill-tag skill-offered">{{ r.skillOffered }}</span>
-              </div>
-              <div class="req-skill-row">
-                <span class="req-arrow">🎯</span>
-                <span class="req-label">You want:</span>
-                <span class="skill-tag skill-wanted">{{ r.skillRequested }}</span>
-              </div>
-            </div>
-
-            <div class="req-message" *ngIf="r.message">
-              <span class="msg-icon">💬</span>
-              <span>{{ r.message }}</span>
-            </div>
+            }
           </div>
-        </div>
+        }
       </div>
+    }
+    
+    <!-- Sent -->
+    @if (!loading() && activeTab() === 'sent') {
+      <div>
+        @if (sent().length === 0) {
+          <div class="empty-state">
+            <div class="empty-icon">📤</div>
+            <h3>No sent requests yet</h3>
+            <p>Go to Matches to send a swap request to a compatible student.</p>
+          </div>
+        }
+        @if (sent().length > 0) {
+          <div class="requests-list">
+            @for (r of sent(); track r) {
+              <div class="request-card card">
+                <div class="req-header">
+                  <div class="req-avatar warm">{{ getInitials(r.receiverId?.name) }}</div>
+                  <div class="req-meta">
+                    <h4>{{ r.receiverId?.name }}</h4>
+                    <p>{{ r.receiverId?.email }}</p>
+                    <div class="req-time">{{ r.createdAt | date:'mediumDate' }}</div>
+                  </div>
+                  <span class="badge" [class]="'badge-' + r.status">{{ r.status }}</span>
+                </div>
+                <div class="req-exchange">
+                  <div class="req-skill-row">
+                    <span class="req-arrow">🎁</span>
+                    <span class="req-label">You offer:</span>
+                    <span class="skill-tag skill-offered">{{ r.skillOffered }}</span>
+                  </div>
+                  <div class="req-skill-row">
+                    <span class="req-arrow">🎯</span>
+                    <span class="req-label">You want:</span>
+                    <span class="skill-tag skill-wanted">{{ r.skillRequested }}</span>
+                  </div>
+                </div>
+                @if (r.message) {
+                  <div class="req-message">
+                    <span class="msg-icon">💬</span>
+                    <span>{{ r.message }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
     </div>
-  `,
-  styles: [`
+    `,
+    styles: [`
     .req-tabs {
       display: flex; gap: 0.5rem; margin-bottom: 2rem;
       background: white; padding: 4px; border-radius: 12px;

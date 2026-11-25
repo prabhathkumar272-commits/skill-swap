@@ -1,13 +1,12 @@
 import { Component } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
-  selector: 'app-home',
-  standalone: true,
-  imports: [RouterLink, CommonModule],
-  template: `
+    selector: 'app-home',
+    imports: [RouterLink],
+    template: `
     <div class="home">
       <!-- Hero Section -->
       <section class="hero">
@@ -60,7 +59,7 @@ import { CommonModule } from '@angular/common';
           <div class="match-badge">✨ Perfect Match!</div>
         </div>
       </section>
-
+    
       <!-- How it works -->
       <section class="section" id="how">
         <div class="section-inner">
@@ -99,7 +98,7 @@ import { CommonModule } from '@angular/common';
           </div>
         </div>
       </section>
-
+    
       <!-- Skills Cloud -->
       <section class="section skills-section">
         <div class="section-inner">
@@ -107,11 +106,13 @@ import { CommonModule } from '@angular/common';
             <h2>Popular Skills Being Swapped</h2>
           </div>
           <div class="skills-cloud">
-            <span class="cloud-tag" *ngFor="let tag of skillTags">{{ tag }}</span>
+            @for (tag of skillTags; track tag) {
+              <span class="cloud-tag">{{ tag }}</span>
+            }
           </div>
         </div>
       </section>
-
+    
       <!-- CTA Section -->
       <section class="cta-section">
         <div class="cta-inner">
@@ -120,14 +121,14 @@ import { CommonModule } from '@angular/common';
           <a routerLink="/auth" class="btn btn-primary btn-lg">Join SkillSwap →</a>
         </div>
       </section>
-
+    
       <!-- Footer -->
       <footer class="footer">
         <span>🎓 SkillSwap Campus &nbsp;|&nbsp; Built for Students, By Students</span>
       </footer>
     </div>
-  `,
-  styles: [`
+    `,
+    styles: [`
     .home { min-height: 100vh; }
     /* Hero */
     .hero {

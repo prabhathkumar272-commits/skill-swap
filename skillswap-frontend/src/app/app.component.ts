@@ -1,36 +1,37 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { AuthService } from './services/auth.service';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
-  template: `
-    <nav class="navbar" *ngIf="authService.isLoggedIn()">
-      <div class="nav-brand">
-        <span class="brand-icon">🎓</span>
-        <span class="brand-text">SkillSwap</span>
-      </div>
-      <div class="nav-links">
-        <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-        <a routerLink="/matches" routerLinkActive="active">Matches</a>
-        <a routerLink="/requests" routerLinkActive="active">Requests</a>
-        <a routerLink="/sessions" routerLinkActive="active">Sessions</a>
-        <a routerLink="/profile" routerLinkActive="active">Profile</a>
-      </div>
-      <div class="nav-actions">
-        <span class="user-greeting">Hi, {{ (authService.currentUser()?.name || '').split(' ')[0] }} 👋</span>
-        <button class="btn-logout" (click)="logout()">Sign Out</button>
-      </div>
-    </nav>
+    selector: 'app-root',
+    imports: [RouterOutlet, RouterLink, RouterLinkActive],
+    template: `
+    @if (authService.isLoggedIn()) {
+      <nav class="navbar">
+        <div class="nav-brand">
+          <span class="brand-icon">🎓</span>
+          <span class="brand-text">SkillSwap</span>
+        </div>
+        <div class="nav-links">
+          <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+          <a routerLink="/matches" routerLinkActive="active">Matches</a>
+          <a routerLink="/requests" routerLinkActive="active">Requests</a>
+          <a routerLink="/sessions" routerLinkActive="active">Sessions</a>
+          <a routerLink="/profile" routerLinkActive="active">Profile</a>
+        </div>
+        <div class="nav-actions">
+          <span class="user-greeting">Hi, {{ (authService.currentUser()?.name || '').split(' ')[0] }} 👋</span>
+          <button class="btn-logout" (click)="logout()">Sign Out</button>
+        </div>
+      </nav>
+    }
     <main>
       <router-outlet></router-outlet>
     </main>
-  `,
-  styles: [`
+    `,
+    styles: [`
     .navbar {
       display: flex;
       align-items: center;

@@ -1,20 +1,19 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-dashboard',
-  standalone: true,
-  imports: [CommonModule, RouterLink],
-  template: `
+    selector: 'app-dashboard',
+    imports: [RouterLink],
+    template: `
     <div class="page fade-in">
       <div class="page-header">
         <h1>Welcome back, {{ user?.name?.split(' ')[0] }}! 👋</h1>
         <p>Here's your skill exchange overview</p>
       </div>
-
+    
       <!-- Stats Row -->
       <div class="stats-grid">
         <div class="stat-card">
@@ -46,7 +45,7 @@ import { AuthService } from '../../services/auth.service';
           </div>
         </div>
       </div>
-
+    
       <div class="grid-2" style="margin-top:2rem">
         <!-- Profile Summary -->
         <div class="card">
@@ -59,27 +58,37 @@ import { AuthService } from '../../services/auth.service';
             <div class="profile-info">
               <h4>{{ user?.name }}</h4>
               <p>{{ user?.email }}</p>
-              <p class="bio" *ngIf="user?.bio">{{ user?.bio }}</p>
+              @if (user?.bio) {
+                <p class="bio">{{ user?.bio }}</p>
+              }
             </div>
           </div>
           <div class="skills-section">
             <div class="skills-row">
               <span class="skills-label">✅ I can teach:</span>
               <div class="tags-row">
-                <span class="skill-tag skill-offered" *ngFor="let s of user?.skillsOffered">{{ s }}</span>
-                <span class="empty-tag" *ngIf="!user?.skillsOffered?.length">None added yet</span>
+                @for (s of user?.skillsOffered; track s) {
+                  <span class="skill-tag skill-offered">{{ s }}</span>
+                }
+                @if (!user?.skillsOffered?.length) {
+                  <span class="empty-tag">None added yet</span>
+                }
               </div>
             </div>
             <div class="skills-row" style="margin-top:0.8rem">
               <span class="skills-label">🎯 I want to learn:</span>
               <div class="tags-row">
-                <span class="skill-tag skill-wanted" *ngFor="let s of user?.skillsWanted">{{ s }}</span>
-                <span class="empty-tag" *ngIf="!user?.skillsWanted?.length">None added yet</span>
+                @for (s of user?.skillsWanted; track s) {
+                  <span class="skill-tag skill-wanted">{{ s }}</span>
+                }
+                @if (!user?.skillsWanted?.length) {
+                  <span class="empty-tag">None added yet</span>
+                }
               </div>
             </div>
           </div>
         </div>
-
+    
         <!-- Quick Actions -->
         <div class="card">
           <h3 style="margin-bottom:1.5rem">Quick Actions</h3>
@@ -119,29 +128,35 @@ import { AuthService } from '../../services/auth.service';
           </div>
         </div>
       </div>
-
+    
       <!-- Recent Matches -->
-      <div class="card" style="margin-top:2rem" *ngIf="matches().length > 0">
-        <div class="card-header">
-          <h3>Recent Matches</h3>
-          <a routerLink="/matches" class="btn btn-ghost btn-sm">View All →</a>
-        </div>
-        <div class="matches-preview">
-          <div class="match-preview-card" *ngFor="let m of matches().slice(0,3)">
-            <div class="mp-avatar">{{ getInitials(m.user.name) }}</div>
-            <div class="mp-info">
-              <div class="mp-name">{{ m.user.name }}</div>
-              <div class="mp-skills">
-                <span class="skill-tag skill-offered" *ngFor="let s of m.canTeach.slice(0,2)">{{ s }}</span>
+      @if (matches().length > 0) {
+        <div class="card" style="margin-top:2rem">
+          <div class="card-header">
+            <h3>Recent Matches</h3>
+            <a routerLink="/matches" class="btn btn-ghost btn-sm">View All →</a>
+          </div>
+          <div class="matches-preview">
+            @for (m of matches().slice(0,3); track m) {
+              <div class="match-preview-card">
+                <div class="mp-avatar">{{ getInitials(m.user.name) }}</div>
+                <div class="mp-info">
+                  <div class="mp-name">{{ m.user.name }}</div>
+                  <div class="mp-skills">
+                    @for (s of m.canTeach.slice(0,2); track s) {
+                      <span class="skill-tag skill-offered">{{ s }}</span>
+                    }
+                  </div>
+                </div>
+                <div class="mp-score">⭐ {{ m.matchScore }}</div>
               </div>
-            </div>
-            <div class="mp-score">⭐ {{ m.matchScore }}</div>
+            }
           </div>
         </div>
-      </div>
+      }
     </div>
-  `,
-  styles: [`
+    `,
+    styles: [`
     .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
     .stat-card {
       background: white; border-radius: var(--radius); padding: 1.5rem;

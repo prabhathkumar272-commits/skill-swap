@@ -1,20 +1,19 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-matches',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
+    selector: 'app-matches',
+    imports: [FormsModule],
+    template: `
     <div class="page fade-in">
       <div class="page-header">
         <h1>🔍 Skill Matches</h1>
         <p>Students with complementary skill profiles — you teach them, they teach you!</p>
       </div>
-
+    
       <!-- Search Filter -->
       <div class="filter-bar">
         <input class="form-control search-input" [(ngModel)]="searchTerm" placeholder="🔍 Search by name or skill..." />
@@ -22,106 +21,131 @@ import { AuthService } from '../../services/auth.service';
           <span class="filter-hint">{{ filteredMatches().length }} match(es) found</span>
         </div>
       </div>
-
+    
       <!-- Loading -->
-      <div class="loading-state" *ngIf="loading()">
-        <div class="spinner"></div>
-        <p>Finding your matches...</p>
-      </div>
-
+      @if (loading()) {
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Finding your matches...</p>
+        </div>
+      }
+    
       <!-- Empty State -->
-      <div class="empty-state" *ngIf="!loading() && filteredMatches().length === 0">
-        <div class="empty-icon">🤷</div>
-        <h3>No matches found yet</h3>
-        <p>Update your profile with more skills to get better matches!</p>
-      </div>
-
+      @if (!loading() && filteredMatches().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">🤷</div>
+          <h3>No matches found yet</h3>
+          <p>Update your profile with more skills to get better matches!</p>
+        </div>
+      }
+    
       <!-- Matches Grid -->
-      <div class="grid-auto" *ngIf="!loading()">
-        <div class="match-card card" *ngFor="let m of filteredMatches()">
-          <div class="match-header">
-            <div class="match-avatar">{{ getInitials(m.user.name) }}</div>
-            <div class="match-meta">
-              <h4>{{ m.user.name }}</h4>
-              <p>{{ m.user.email }}</p>
-              <div class="match-score-badge">⭐ Match Score: {{ m.matchScore }}</div>
-            </div>
-          </div>
-
-          <div class="exchange-section">
-            <div class="exchange-col">
-              <div class="ex-label">They can teach you:</div>
-              <div class="tags-row">
-                <span class="skill-tag skill-offered" *ngFor="let s of m.canLearn">{{ s }}</span>
-                <span class="no-skill" *ngIf="!m.canLearn.length">—</span>
+      @if (!loading()) {
+        <div class="grid-auto">
+          @for (m of filteredMatches(); track m) {
+            <div class="match-card card">
+              <div class="match-header">
+                <div class="match-avatar">{{ getInitials(m.user.name) }}</div>
+                <div class="match-meta">
+                  <h4>{{ m.user.name }}</h4>
+                  <p>{{ m.user.email }}</p>
+                  <div class="match-score-badge">⭐ Match Score: {{ m.matchScore }}</div>
+                </div>
+              </div>
+              <div class="exchange-section">
+                <div class="exchange-col">
+                  <div class="ex-label">They can teach you:</div>
+                  <div class="tags-row">
+                    @for (s of m.canLearn; track s) {
+                      <span class="skill-tag skill-offered">{{ s }}</span>
+                    }
+                    @if (!m.canLearn.length) {
+                      <span class="no-skill">—</span>
+                    }
+                  </div>
+                </div>
+                <div class="exchange-divider">⇄</div>
+                <div class="exchange-col">
+                  <div class="ex-label">You can teach them:</div>
+                  <div class="tags-row">
+                    @for (s of m.canTeach; track s) {
+                      <span class="skill-tag skill-wanted">{{ s }}</span>
+                    }
+                    @if (!m.canTeach.length) {
+                      <span class="no-skill">—</span>
+                    }
+                  </div>
+                </div>
+              </div>
+              @if (m.user.availability?.days?.length) {
+                <div class="availability-row">
+                  <span class="avail-icon">📅</span>
+                  <span>Available: {{ m.user.availability.days.slice(0,3).join(', ') }}</span>
+                </div>
+              }
+              <div class="match-actions">
+                <button
+                  class="btn btn-primary"
+                  (click)="openRequestModal(m)"
+                  [disabled]="!!sentRequests[m.user._id]"
+                  >
+                  {{ sentRequests[m.user._id] ? '✅ Request Sent' : '🤝 Send Swap Request' }}
+                </button>
               </div>
             </div>
-            <div class="exchange-divider">⇄</div>
-            <div class="exchange-col">
-              <div class="ex-label">You can teach them:</div>
-              <div class="tags-row">
-                <span class="skill-tag skill-wanted" *ngFor="let s of m.canTeach">{{ s }}</span>
-                <span class="no-skill" *ngIf="!m.canTeach.length">—</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="availability-row" *ngIf="m.user.availability?.days?.length">
-            <span class="avail-icon">📅</span>
-            <span>Available: {{ m.user.availability.days.slice(0,3).join(', ') }}</span>
-          </div>
-
-          <div class="match-actions">
-            <button
-              class="btn btn-primary"
-              (click)="openRequestModal(m)"
-              [disabled]="!!sentRequests[m.user._id]"
-            >
-              {{ sentRequests[m.user._id] ? '✅ Request Sent' : '🤝 Send Swap Request' }}
-            </button>
-          </div>
+          }
         </div>
-      </div>
+      }
     </div>
-
+    
     <!-- Request Modal -->
-    <div class="modal-overlay" *ngIf="showModal()" (click)="closeModal()">
-      <div class="modal-box" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>Send Swap Request</h3>
-          <button class="modal-close" (click)="closeModal()">×</button>
-        </div>
-        <div class="modal-body" *ngIf="selectedMatch">
-          <p style="color:var(--text-light);font-size:0.9rem;margin-bottom:1.2rem">
-            to <strong>{{ selectedMatch.user.name }}</strong>
-          </p>
-          <div class="form-group">
-            <label>Skill you'll offer</label>
-            <select class="form-control" [(ngModel)]="reqData.skillOffered">
-              <option value="">Select...</option>
-              <option *ngFor="let s of mySkillsOffered">{{ s }}</option>
-            </select>
+    @if (showModal()) {
+      <div class="modal-overlay" (click)="closeModal()">
+        <div class="modal-box" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Send Swap Request</h3>
+            <button class="modal-close" (click)="closeModal()">×</button>
           </div>
-          <div class="form-group">
-            <label>Skill you want to learn</label>
-            <select class="form-control" [(ngModel)]="reqData.skillRequested">
-              <option value="">Select...</option>
-              <option *ngFor="let s of selectedMatch.canLearn">{{ s }}</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Message (optional)</label>
-            <textarea class="form-control" [(ngModel)]="reqData.message" rows="3" placeholder="Hi! I'd love to swap skills with you..."></textarea>
-          </div>
-          <div class="error-msg" *ngIf="reqError()">{{ reqError() }}</div>
-          <button class="btn btn-primary btn-block" (click)="sendRequest()" [disabled]="reqLoading()">
-            {{ reqLoading() ? 'Sending...' : '🚀 Send Request' }}
-          </button>
+          @if (selectedMatch) {
+            <div class="modal-body">
+              <p style="color:var(--text-light);font-size:0.9rem;margin-bottom:1.2rem">
+                to <strong>{{ selectedMatch.user.name }}</strong>
+              </p>
+              <div class="form-group">
+                <label>Skill you'll offer</label>
+                <select class="form-control" [(ngModel)]="reqData.skillOffered">
+                  <option value="">Select...</option>
+                  @for (s of mySkillsOffered; track s) {
+                    <option>{{ s }}</option>
+                  }
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Skill you want to learn</label>
+                <select class="form-control" [(ngModel)]="reqData.skillRequested">
+                  <option value="">Select...</option>
+                  @for (s of selectedMatch.canLearn; track s) {
+                    <option>{{ s }}</option>
+                  }
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Message (optional)</label>
+                <textarea class="form-control" [(ngModel)]="reqData.message" rows="3" placeholder="Hi! I'd love to swap skills with you..."></textarea>
+              </div>
+              @if (reqError()) {
+                <div class="error-msg">{{ reqError() }}</div>
+              }
+              <button class="btn btn-primary btn-block" (click)="sendRequest()" [disabled]="reqLoading()">
+                {{ reqLoading() ? 'Sending...' : '🚀 Send Request' }}
+              </button>
+            </div>
+          }
         </div>
       </div>
-    </div>
-  `,
-  styles: [`
+    }
+    `,
+    styles: [`
     .filter-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; }
     .search-input { flex: 1; max-width: 400px; }
     .filter-hint { font-size: 0.85rem; color: var(--text-light); font-weight: 500; }

@@ -1,74 +1,87 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-sessions',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
+    selector: 'app-sessions',
+    imports: [FormsModule],
+    template: `
     <div class="page fade-in">
       <div class="page-header">
         <h1>📅 My Sessions</h1>
         <p>View and manage your scheduled skill exchange sessions</p>
       </div>
-
+    
       <div class="sessions-layout">
         <!-- Sessions List -->
         <div class="sessions-main">
-          <div class="loading-state" *ngIf="loading()">
-            <div class="spinner"></div>
-            <p>Loading sessions...</p>
-          </div>
-
-          <div class="empty-state" *ngIf="!loading() && sessions().length === 0">
-            <div class="empty-icon">📭</div>
-            <h3>No sessions scheduled yet</h3>
-            <p>Use the form on the right to book your first skill exchange session.</p>
-          </div>
-
-          <div class="sessions-list" *ngIf="!loading()">
-            <div class="session-card card" *ngFor="let s of sessions()">
-              <div class="session-header">
-                <div class="session-icon">🎓</div>
-                <div class="session-meta">
-                  <h4>{{ s.skillTopic || 'Skill Session' }}</h4>
-                  <div class="session-users">
-                    <span *ngFor="let u of s.users" class="user-chip">{{ u.name || u }}</span>
-                  </div>
-                </div>
-                <span class="badge" [class]="'badge-' + s.status">{{ s.status }}</span>
-              </div>
-
-              <div class="session-details">
-                <div class="detail-row">
-                  <span class="detail-icon">📅</span>
-                  <span>{{ s.date }}</span>
-                </div>
-                <div class="detail-row">
-                  <span class="detail-icon">🕐</span>
-                  <span>{{ s.timeSlot }}</span>
-                </div>
-                <div class="detail-row" *ngIf="s.meetLink">
-                  <span class="detail-icon">🔗</span>
-                  <a [href]="s.meetLink" target="_blank" class="meet-link">Join Meeting</a>
-                </div>
-                <div class="detail-row" *ngIf="s.notes">
-                  <span class="detail-icon">📝</span>
-                  <span>{{ s.notes }}</span>
-                </div>
-              </div>
-
-              <div class="session-actions" *ngIf="s.status === 'scheduled'">
-                <button class="btn btn-success btn-sm" (click)="updateStatus(s._id, 'completed')">✅ Mark Completed</button>
-                <button class="btn btn-danger btn-sm" (click)="updateStatus(s._id, 'cancelled')">Cancel</button>
-              </div>
+          @if (loading()) {
+            <div class="loading-state">
+              <div class="spinner"></div>
+              <p>Loading sessions...</p>
             </div>
-          </div>
+          }
+    
+          @if (!loading() && sessions().length === 0) {
+            <div class="empty-state">
+              <div class="empty-icon">📭</div>
+              <h3>No sessions scheduled yet</h3>
+              <p>Use the form on the right to book your first skill exchange session.</p>
+            </div>
+          }
+    
+          @if (!loading()) {
+            <div class="sessions-list">
+              @for (s of sessions(); track s) {
+                <div class="session-card card">
+                  <div class="session-header">
+                    <div class="session-icon">🎓</div>
+                    <div class="session-meta">
+                      <h4>{{ s.skillTopic || 'Skill Session' }}</h4>
+                      <div class="session-users">
+                        @for (u of s.users; track u) {
+                          <span class="user-chip">{{ u.name || u }}</span>
+                        }
+                      </div>
+                    </div>
+                    <span class="badge" [class]="'badge-' + s.status">{{ s.status }}</span>
+                  </div>
+                  <div class="session-details">
+                    <div class="detail-row">
+                      <span class="detail-icon">📅</span>
+                      <span>{{ s.date }}</span>
+                    </div>
+                    <div class="detail-row">
+                      <span class="detail-icon">🕐</span>
+                      <span>{{ s.timeSlot }}</span>
+                    </div>
+                    @if (s.meetLink) {
+                      <div class="detail-row">
+                        <span class="detail-icon">🔗</span>
+                        <a [href]="s.meetLink" target="_blank" class="meet-link">Join Meeting</a>
+                      </div>
+                    }
+                    @if (s.notes) {
+                      <div class="detail-row">
+                        <span class="detail-icon">📝</span>
+                        <span>{{ s.notes }}</span>
+                      </div>
+                    }
+                  </div>
+                  @if (s.status === 'scheduled') {
+                    <div class="session-actions">
+                      <button class="btn btn-success btn-sm" (click)="updateStatus(s._id, 'completed')">✅ Mark Completed</button>
+                      <button class="btn btn-danger btn-sm" (click)="updateStatus(s._id, 'cancelled')">Cancel</button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
         </div>
-
+    
         <!-- Book Session Form -->
         <div class="book-panel card">
           <h3 style="margin-bottom:1.5rem;font-size:1rem;font-weight:700">📅 Book a Session</h3>
@@ -88,7 +101,9 @@ import { AuthService } from '../../services/auth.service';
             <label>Time Slot</label>
             <select class="form-control" [(ngModel)]="bookData.timeSlot">
               <option value="">Select...</option>
-              <option *ngFor="let s of timeSlots">{{ s }}</option>
+              @for (s of timeSlots; track s) {
+                <option>{{ s }}</option>
+              }
             </select>
           </div>
           <div class="form-group">
@@ -99,16 +114,20 @@ import { AuthService } from '../../services/auth.service';
             <label>Notes (optional)</label>
             <textarea class="form-control" [(ngModel)]="bookData.notes" rows="2" placeholder="Topics to cover..."></textarea>
           </div>
-          <div class="success-msg" *ngIf="bookSuccess()">✅ Session booked successfully!</div>
-          <div class="error-msg" *ngIf="bookError()">{{ bookError() }}</div>
+          @if (bookSuccess()) {
+            <div class="success-msg">✅ Session booked successfully!</div>
+          }
+          @if (bookError()) {
+            <div class="error-msg">{{ bookError() }}</div>
+          }
           <button class="btn btn-primary btn-block" (click)="bookSession()" [disabled]="bookLoading()">
             {{ bookLoading() ? 'Booking...' : '📅 Book Session' }}
           </button>
         </div>
       </div>
     </div>
-  `,
-  styles: [`
+    `,
+    styles: [`
     .sessions-layout { display: grid; grid-template-columns: 1fr 360px; gap: 2rem; align-items: start; }
     .sessions-list { display: flex; flex-direction: column; gap: 1rem; }
     .session-card { display: flex; flex-direction: column; gap: 1rem; }

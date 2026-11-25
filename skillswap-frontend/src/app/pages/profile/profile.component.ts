@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
@@ -8,16 +8,15 @@ const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
 const SLOTS = ['8:00-10:00 AM', '10:00-12:00 PM', '12:00-2:00 PM', '2:00-4:00 PM', '4:00-6:00 PM', '6:00-8:00 PM'];
 
 @Component({
-  selector: 'app-profile',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
+    selector: 'app-profile',
+    imports: [FormsModule],
+    template: `
     <div class="page fade-in">
       <div class="page-header">
         <h1>My Profile</h1>
         <p>Manage your skills and availability</p>
       </div>
-
+    
       <div class="grid-2">
         <!-- Left: Basic Info -->
         <div class="card">
@@ -38,81 +37,91 @@ const SLOTS = ['8:00-10:00 AM', '10:00-12:00 PM', '12:00-2:00 PM', '2:00-4:00 PM
             <textarea class="form-control" [(ngModel)]="profile.bio" rows="3" placeholder="Tell others about yourself, your year, department..."></textarea>
           </div>
         </div>
-
+    
         <!-- Right: Skills -->
         <div class="card">
           <h3 class="section-title">My Skills</h3>
-
+    
           <div class="form-group">
             <label>✅ Skills I Can Teach</label>
             <div class="tags-input-area">
-              <div class="skill-tag skill-offered" *ngFor="let s of profile.skillsOffered">
-                {{ s }} <span class="remove-tag" (click)="removeSkill('offered', s)">×</span>
-              </div>
+              @for (s of profile.skillsOffered; track s) {
+                <div class="skill-tag skill-offered">
+                  {{ s }} <span class="remove-tag" (click)="removeSkill('offered', s)">×</span>
+                </div>
+              }
               <input
                 class="tag-input"
                 [(ngModel)]="newOffered"
                 (keydown.enter)="addSkill('offered', $event)"
                 placeholder="Type skill and press Enter"
-              />
+                />
             </div>
           </div>
-
+    
           <div class="form-group" style="margin-top:1.2rem">
             <label>🎯 Skills I Want to Learn</label>
             <div class="tags-input-area">
-              <div class="skill-tag skill-wanted" *ngFor="let s of profile.skillsWanted">
-                {{ s }} <span class="remove-tag" (click)="removeSkill('wanted', s)">×</span>
-              </div>
+              @for (s of profile.skillsWanted; track s) {
+                <div class="skill-tag skill-wanted">
+                  {{ s }} <span class="remove-tag" (click)="removeSkill('wanted', s)">×</span>
+                </div>
+              }
               <input
                 class="tag-input"
                 [(ngModel)]="newWanted"
                 (keydown.enter)="addSkill('wanted', $event)"
                 placeholder="Type skill and press Enter"
-              />
+                />
             </div>
           </div>
         </div>
-
+    
         <!-- Availability -->
         <div class="card">
           <h3 class="section-title">📅 Availability</h3>
           <label class="avail-label">Available Days</label>
           <div class="days-grid">
-            <div
-              class="day-chip"
-              *ngFor="let d of days"
-              [class.selected]="profile.availability.days.includes(d)"
-              (click)="toggleDay(d)"
-            >{{ d.slice(0, 3) }}</div>
+            @for (d of days; track d) {
+              <div
+                class="day-chip"
+                [class.selected]="profile.availability.days.includes(d)"
+                (click)="toggleDay(d)"
+              >{{ d.slice(0, 3) }}</div>
+            }
           </div>
           <label class="avail-label" style="margin-top:1.2rem">Preferred Time Slots</label>
           <div class="slots-grid">
-            <div
-              class="slot-chip"
-              *ngFor="let s of slots"
-              [class.selected]="profile.availability.timeSlots.includes(s)"
-              (click)="toggleSlot(s)"
-            >{{ s }}</div>
+            @for (s of slots; track s) {
+              <div
+                class="slot-chip"
+                [class.selected]="profile.availability.timeSlots.includes(s)"
+                (click)="toggleSlot(s)"
+              >{{ s }}</div>
+            }
           </div>
         </div>
-
+    
         <!-- Save -->
         <div class="card save-card">
           <h3 class="section-title">Save Changes</h3>
           <p style="color:var(--text-light);font-size:0.88rem;margin-bottom:1.5rem">
             Keep your profile updated to improve your match quality.
           </p>
-          <div class="success-msg" *ngIf="success()">✅ Profile updated successfully!</div>
-          <div class="error-msg" *ngIf="error()">{{ error() }}</div>
+          @if (success()) {
+            <div class="success-msg">✅ Profile updated successfully!</div>
+          }
+          @if (error()) {
+            <div class="error-msg">{{ error() }}</div>
+          }
           <button class="btn btn-primary btn-block" (click)="save()" [disabled]="loading()">
             {{ loading() ? 'Saving...' : '💾 Save Profile' }}
           </button>
         </div>
       </div>
     </div>
-  `,
-  styles: [`
+    `,
+    styles: [`
     .section-title { font-size: 1rem; font-weight: 700; margin-bottom: 1.5rem; }
     .avatar-section { display: flex; justify-content: center; margin-bottom: 1.5rem; }
     .big-avatar {

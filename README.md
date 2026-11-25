@@ -7,7 +7,7 @@
 A campus peer-learning prototype that helps students find skill exchange partners, send swap requests, and arrange learning sessions.
 
 <p>
-  <img src="https://img.shields.io/badge/Angular-17-DD0031?logo=angular&logoColor=white" alt="Angular 17" />
+  <img src="https://img.shields.io/badge/Angular-21-DD0031?logo=angular&logoColor=white" alt="Angular 21" />
   <img src="https://img.shields.io/badge/Node.js-API-339933?logo=nodedotjs&logoColor=white" alt="Node.js API" />
   <img src="https://img.shields.io/badge/Express-4-111111?logo=express&logoColor=white" alt="Express 4" />
   <img src="https://img.shields.io/badge/MongoDB-Mongoose-47A248?logo=mongodb&logoColor=white" alt="MongoDB with Mongoose" />
@@ -41,7 +41,7 @@ No application screenshots are currently included in the repository. Add screens
 
 | Area | Technologies |
 | --- | --- |
-| Frontend | Angular 17, TypeScript, RxJS, Angular Router |
+| Frontend | Angular 21, TypeScript, RxJS, Angular Router |
 | Backend | Node.js, Express 4 |
 | Database | MongoDB, Mongoose 8 |
 | Authentication | JSON Web Tokens, bcryptjs |
@@ -51,7 +51,7 @@ No application screenshots are currently included in the repository. Add screens
 
 ### Prerequisites
 
-- Node.js 18.13+ or 20.9+
+- Node.js 20.19+, 22.12+, or 24+
 - npm
 - MongoDB running locally or a MongoDB connection string
 
@@ -105,7 +105,7 @@ Configure these in `skillswap-backend/.env`:
 | `PORT` | `5000` | API port |
 | `MONGO_URI` | `mongodb://127.0.0.1:27017/skillswap` | MongoDB connection string |
 | `JWT_SECRET` | No production default | Secret used to sign authentication tokens; set a long, random value |
-| `CLIENT_ORIGIN` | `http://localhost:4200` | Allowed frontend origin for CORS |
+| `CLIENT_ORIGIN` | `http://localhost:4200,http://127.0.0.1:4200` | Comma-separated frontend origins allowed by CORS |
 
 Never commit `.env` files or real credentials. The repository includes `.env.example` with local-development defaults.
 
